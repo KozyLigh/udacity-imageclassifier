@@ -51,7 +51,7 @@ dataloaders, dataloaders_validation, dataloaders_test = projectUtils.load_data(w
 
 model, optimizer, criterion = projectUtils.nn_setup(network, dropout, hidden_layer1, lr, power)
 
-projectUtils.train_network(model, optimizer, criterion, dataloaders, dataloaders_validation, dataloaders_test, epochs, 5, power)
+projectUtils.train_network(model, criterion, optimizer, dataloaders, dataloaders_validation, dataloaders_test, epochs, 5, power)
 
 projectUtils.save_checkpoint(path, network, hidden_layer1, dropout, lr)
 
