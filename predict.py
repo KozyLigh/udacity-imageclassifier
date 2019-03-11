@@ -1,17 +1,6 @@
-import matplotlib.pyplot as plt
 import numpy as np
-import torch
-from torch import nn
-from torch import tensor
-from torch import optim
-import torch.nn.functional as F
-from torch.autograd import Variable
-from torchvision import datasets, transforms
-import torchvision.models as models
-from collections import OrderedDict
 import json
-import PIL
-from PIL import Image
+
 import argparse
 
 import projectUtils
@@ -43,19 +32,17 @@ print(input_img)
 print(path)
 print("#### args end ####")
 
+dataloaders, dataloaders_validation, dataloaders_test, image_datasets = projectUtils.load_data()
 
-dataloaders, dataloaders_validation, dataloaders_test = projectUtils.load_data()
-
-projectUtils.load_model(path)
+model = projectUtils.load_model(path)
 
 with open('cat_to_name.json', 'r') as json_file:
     cat_to_name = json.load(json_file)
 
 probabilities = projectUtils.predict(image_path, model, number_of_outputs, power)
 
-labels = [cat_to_name[str(index + 1)] for index in np.array(probabilities[1][0])]
-probability = np.array(probabilities[0][0])
-
+labels = [cat_to_name[str(index + 1)] for index in np.array(probabilities[1][0].cpu())]
+probability = np.array(probabilities[0][0].cpu())
 
 i=0
 while i < number_of_outputs:

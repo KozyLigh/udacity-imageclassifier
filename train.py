@@ -47,12 +47,12 @@ print(epochs)
 print("#### args end ####")
 
 
-dataloaders, dataloaders_validation, dataloaders_test = projectUtils.load_data(where)
+dataloaders, dataloaders_validation, dataloaders_test, image_datasets = projectUtils.load_data(where)
 
 model, optimizer, criterion = projectUtils.nn_setup(network, dropout, hidden_layer1, lr, power)
 
 projectUtils.train_network(model, criterion, optimizer, dataloaders, dataloaders_validation, dataloaders_test, epochs, 5, power)
 
-projectUtils.save_checkpoint(path, network, hidden_layer1, dropout, lr)
+projectUtils.save_checkpoint(image_datasets, model, path, network, hidden_layer1, dropout, lr)
 
 print("The model has been trained!")

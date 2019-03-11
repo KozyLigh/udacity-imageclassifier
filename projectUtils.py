@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from torch import nn
+from torch import tensor
 from torch import optim
 import torch.nn.functional as F
 from torchvision import datasets, transforms
@@ -52,7 +53,7 @@ def load_data(where  = "./flowers"):
     dataloaders_validation = torch.utils.data.DataLoader(image_datasets_validation,batch_size=32, shuffle=True)
     dataloaders_test = torch.utils.data.DataLoader(image_datasets_test,batch_size=20, shuffle=True)
 
-    return dataloaders, dataloaders_validation, dataloaders_test
+    return dataloaders, dataloaders_validation, dataloaders_test, image_datasets
     
 with open('cat_to_name.json', 'r') as f:
     cat_to_name = json.load(f)
@@ -148,12 +149,12 @@ def train_network(model, criterion, optimizer, dataloaders, dataloaders_validati
     print("### Finished training ###")
     print("### Epochs: {} ###".format(epochs))
     print("### Steps: {} ###".format(steps))
-    check_accuracy_on_test(dataloaders_test)
+    check_accuracy_on_test(dataloaders_test, power, model)
     print("######")
 
 
 # TODO: Do validation on the test set
-def check_accuracy_on_test(dataloaders_test):
+def check_accuracy_on_test(dataloaders_test, power, model):
     correct = 0
     total = 0
     if torch.cuda.is_available() and power == 'gpu':
@@ -171,7 +172,7 @@ def check_accuracy_on_test(dataloaders_test):
     print('Accuracy on the test images: %d %%' % (100 * correct / total))
 
 
-def save_checkpoint(path='checkpoint.pth',network ='densenet121', hidden_layer1=120,dropout=0.5,lr=0.001,epochs=4):
+def save_checkpoint(image_datasets, model, path='checkpoint.pth',network ='densenet121', hidden_layer1=120,dropout=0.5,lr=0.001,epochs=4):
 
     model.class_to_idx = image_datasets.class_to_idx
     model.cpu
@@ -185,9 +186,10 @@ def load_model(path):
     checkpoint=torch.load(path)
     network = checkpoint['network']
     hidden_layer1 = checkpoint['hidden_layer1']
-    model,_,_ = nn_setup(network , 0.5,hidden_layer1)
+    model,_,_ = nn_setup(network, 0.5,hidden_layer1)
     model.class_to_idx = checkpoint['class_to_idx']
     model.load_state_dict(checkpoint['state_dict'])
+    return model
 
 def process_image(image):
     ''' Scales, crops, and normalizes a PIL image for a PyTorch model,
@@ -247,4 +249,5 @@ def predict(image_path, model, topk=5, power='gpu'):
             output=model.forward(image)
     # Softmax = First dimension is your batch dimension, second is depth, third is rows and last one is columns.
     probability = F.softmax(output.data, dim=1)
+
     return probability.topk(topk)
